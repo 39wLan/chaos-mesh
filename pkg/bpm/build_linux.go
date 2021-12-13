@@ -55,6 +55,8 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 	}
 
 	log.Info("build command", "command", cmd+" "+strings.Join(args, " "))
+	args = filetrCentos6(args)
+	log.Info("after filter,build command", "command", cmd+" "+strings.Join(args, " "))
 
 	command := exec.CommandContext(b.ctx, cmd, args...)
 	command.Env = b.env
@@ -77,4 +79,16 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 		Cmd:        command,
 		Identifier: b.identifier,
 	}
+}
+
+func filterCentos6(args []string) []string {
+	filterArgs := []string{}
+	if args[0] == "iptables" {
+		for _, v := range args {
+			if v != "-w" && v != "--wait" {
+				filterArgs = append(filterArgs, v)
+			}
+		}
+	}
+	return filterArgs
 }
